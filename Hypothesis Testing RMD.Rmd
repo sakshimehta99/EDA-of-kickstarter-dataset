@@ -1,0 +1,198 @@
+---
+title: "Milestone 2"
+author: "Sakshi Mehta"
+date: '2022-03-19'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+
+install.packages("FSA")
+library("FSA")
+install.packages("FSAdata")
+library("FSAdata")
+install.packages("magrittr")
+library("magrittr")
+install.packages("dplyr")
+library("dplyr")
+install.packages("plotrix")
+library("plotrix")
+install.packages("ggplot2")
+library("ggplot2")
+install.packages("psych")
+library("psych")
+install.packages("tidyverse")
+library("tidyverse")
+install.packages("stringr")
+library(stringr)
+install.packages("tidyverse", dependencies = TRUE)
+install.packages("moments")
+library(moments)
+install.packages("dyno")
+library(dyno)
+install.packages("ggthemes")
+library(ggthemes)
+install.packages("lubridate")
+library(lubridate)
+install.packages("rworldmap")
+library(rworldmap)
+install.packages("gplots")
+library(gplots)
+install.packages("knitr")
+library(knitr)
+
+# Importing the libraries required
+```{r}
+library(readr)
+library(plyr)
+library(dplyr)
+library(psych)
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+library(ggpubr)
+library(lubridate)
+```
+
+
+# Importing the datset 
+```{r}
+kicks <- read.csv("C:\\Users\\saksh\\Downloads\\ks-projects-201801.csv\\ks-projects-201801.csv")
+head(kicks[, c('main_category','usd.pledged','usd_pledged_real')])
+```
+
+# Checking if there are any missing values
+```{r}
+sapply(kicks, function(x) sum(is.na(x)))
+
+```
+# Dropping columns that have NA or missing values like usd.pledged and renaming usd_pledged_real to usd.pledged
+```{r}
+kicks <- kicks[,-13]
+colnames(kicks)[13] <- "usd.pledged"
+```
+
+# Checking if the decriptive statistics perfromed in Milestone1 project has any inferences.
+
+If the dollars pledged for films and videos category different from total.
+# One Sample t-test
+The one-sample t-test is a statistical hypothesis test used to determine whether an unknown population mean is different from a specific value.
+
+# Finding out the population mean and standard deviation
+```{r}
+mean_pledge <- mean(kicks$usd.pledged, na.rm=TRUE)
+mean_pledge
+
+sd_pledge <- sd(kicks$usd.pledged)
+sd_pledge
+```
+
+# Filtering the data with required main_category as Film & Video
+```{r}
+kicks_FV <- filter(kicks, main_category == "Film & Video")
+head(kicks_FV[, c('main_category','usd.pledged')])
+```
+
+Null hypothesis: There is no difference between the amount of USD pledged in sample and population 
+
+Alternative hypothesis : Mean USD pledge is different in both sample selected and the population data.
+
+As out data is large enough we do not need to check whether the data follow a normal distribution.
+
+# Computing one-sample t-test where we want to know if the avg usd pledged for films and video differs from the usd pledged for entire population 
+
+
+```{r}
+t.test(kicks_FV$usd.pledged, mu = mean_pledge)
+```
+
+Interpretation:
+The p-value of the test is less than 2.2e-16, which is less than the significance level alpha = 0.05. 
+Conclusion: 
+We can conclude that the mean usd pledged for films and videos category is significantly different from mean of entire population.
+
+# UNPAIRED two sample t-test
+The unpaired two-samples t-test is used to compare the mean of two independent groups.
+
+
+# Research  question 2:
+Whether the mean Duration of projects that are successful is less than the mean duration of projects that failed.
+
+Null hypothesis : success_duration is equal to fail_duration
+Alternative hypothesis : fail_duration not equal success_duration'
+
+We can find the length of each project by taking the difference between the project deadline and the project launch date, then dividing by the number of whole days. Now let's plot the success rate of projects based on their length in days.
+
+
+```{r}
+kicks$duration <- interval(ymd_hms(kicks$launched), ymd(kicks$deadline)) %/% days(1)
+```
+
+#Fetching and separating successful and failed state
+```{r}
+kick_success <- filter(kicks, state=="successful")
+head(kick_success[,c('main_category','usd.pledged','state','duration')])
+```
+
+```{r}
+kick_failure <- filter(kicks, state=="failed")
+head(kick_failure[,c('main_category','usd.pledged','state','duration')])
+```
+#getting the vectors
+
+```{r}
+suc_vec <- c(kick_success$duration)
+
+fail_vec <- c(kick_failure$duration)
+```
+# Compute unpaired two-samples t-test
+
+```{r}
+t_test <- t.test(suc_vec,fail_vec,)
+t_test
+```
+
+Interpretation:
+The p-value of the test is  < 2.2e-16 which is less than the significance level alpha = 0.05. 
+We can conclude that average duration of successful project is significantly different from average duration of failed project. That is we reject the null hypothesis. 
+
+# Question 3
+
+If the funding in Technology and art similar or not!
+
+Null Hypothesis : There is no difference in funding.
+Alternative hypothesis : There is difference in funding. 
+
+# Filtering out and selecting the required data
+
+```{r}
+kick_tech <- filter(kicks, main_category=="Technology")
+head(kick_tech[,c('main_category','usd.pledged')])
+```
+
+```{r}
+kick_art <- filter(kicks, main_category =="Art")
+head(kick_art[,c('main_category','usd.pledged')])
+```
+
+# Getting the vectors
+```{r}
+tech_pledge <- c(kick_tech$usd.pledged)
+art_pledge <- c(kick_art$usd.pledged)
+```
+# Two sample T.test
+```{r}
+t_test2 <- t.test(tech_pledge,art_pledge)
+t_test2
+```
+# Interpretation of the result
+p-value of the test is < 2.2e-16, which is less than the significance level alpha = 0.05. 
+We can conclude that there is significance difference in the investment amount of art and technology. 
+Null hypothesis is rejected. 
+
